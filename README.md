@@ -9,7 +9,8 @@ Two offline games for the phone home screen.
 
 Open the site, tap a game, then:
 
-- **iPhone (Safari):** Share → Add to Home Screen → Add
+- **iPhone (Safari):** Share button at the bottom → Add to Home Screen → Add
+- **iPhone (Chrome):** Share button in the address bar → Add to Home Screen → Add (iOS 16.4 or later; if the option is missing, update Chrome or use Safari)
 - **Android (Chrome):** ⋮ menu → Add to home screen / Install app
 
-Each game installs as its own app and works without internet after the first visit.
+Each game installs as its own app and works without internet after the first visit. Once added, a game runs on its own, whichever browser was used to add it.
