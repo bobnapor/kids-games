@@ -30,7 +30,7 @@ body{
 }
 main{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
 h1{margin:0;text-align:center;font:400 clamp(44px,13vw,72px)/1 var(--display);color:#fff;-webkit-text-stroke:4px var(--ink);paint-order:stroke fill;text-shadow:0 6px 0 var(--ink);text-wrap:balance}
-.games{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px}
 .game{display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 10px 14px;text-decoration:none;color:var(--ink);
   background:var(--key);border:3px solid var(--ink);border-radius:24px;box-shadow:0 6px 0 var(--ink);transition:transform .09s,box-shadow .09s}
 .game:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
@@ -58,6 +58,11 @@ h1{margin:0;text-align:center;font:400 clamp(44px,13vw,72px)/1 var(--display);co
       <img src="trace-champ/icon-192.png" alt="">
       <b>Trace Champ</b>
       <span>Trace it, score points</span>
+    </a>
+    <a class="game" href="brick-builder/">
+      <img src="brick-builder/icon-192.png" alt="">
+      <b>Brick Builder</b>
+      <span>Build 3D models or anything you like</span>
     </a>
   </div>
   <section class="help" aria-labelledby="install">

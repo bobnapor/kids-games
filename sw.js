@@ -1,7 +1,7 @@
-// Offline support for Rainbow Doodle and Trace Champ.
+// Offline support for Rainbow Doodle, Trace Champ and Brick Builder.
 // Everything is served from the cache first so the games open instantly with no internet,
 // and refreshed in the background so updates arrive on the next launch.
-const VERSION = 'kids-games-v1';
+const VERSION = 'kids-games-v2';
 const FONTS = 'kids-games-fonts';
 const CORE = [
   './',
@@ -17,7 +17,13 @@ const CORE = [
   './trace-champ/icon-192.png',
   './trace-champ/icon-512.png',
   './trace-champ/icon-maskable-512.png',
-  './trace-champ/apple-touch-icon.png'
+  './trace-champ/apple-touch-icon.png',
+  './brick-builder/',
+  './brick-builder/manifest.webmanifest',
+  './brick-builder/icon-192.png',
+  './brick-builder/icon-512.png',
+  './brick-builder/icon-maskable-512.png',
+  './brick-builder/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', event => {

@@ -1,9 +1,10 @@
 # Kids' Games
 
-Two offline games for the phone home screen.
+Three offline games for the phone home screen.
 
 - **Rainbow Doodle**: finger drawing with a color-changing pen, sparkles, bubbles, stamps and a picture gallery.
 - **Trace Champ**: trace shapes, numbers, letters and pictures; the closer you stay to the line, the higher the score.
+- **Brick Builder**: build 3D brick models step by step (vehicles, space, buildings, animals and more), or make anything in Free Build.
 
 ## Install on a phone
 
