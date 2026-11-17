@@ -117,7 +117,7 @@ button{font:inherit;color:inherit}
 #bar,#colors{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;touch-action:pan-x;padding:10px 4px 8px}
 #bar::-webkit-scrollbar,#colors::-webkit-scrollbar{display:none}
 #bar{min-height:92px}
-#colors{padding-top:2px}
+#colors{padding:10px 8px 10px}
 #build.tpl #colors{display:none}
 .item{
   position:relative;flex:0 0 auto;width:70px;height:70px;display:grid;place-items:center;padding:0;cursor:pointer;touch-action:pan-x;
@@ -130,7 +130,7 @@ button{font:inherit;color:inherit}
 .item[aria-pressed="true"]{background:var(--gold);transform:translateY(-4px);box-shadow:0 8px 0 var(--ink)}
 .sw{flex:0 0 auto;width:42px;height:42px;border-radius:50%;border:3px solid var(--ink);background:var(--c);cursor:pointer;touch-action:pan-x;box-shadow:0 3px 0 var(--ink)}
 .sw.glass{background:linear-gradient(135deg,rgba(191,230,255,.95),rgba(255,255,255,.6) 50%,rgba(150,210,255,.9))}
-.sw[aria-pressed="true"]{transform:translateY(-3px) scale(1.12);box-shadow:0 0 0 3px #fff,0 0 0 6px var(--ink)}
+.sw[aria-pressed="true"]{transform:scale(1.08);box-shadow:0 0 0 3px #fff,0 0 0 6px var(--ink)}
 #stage{grid-area:stage;position:relative;min-height:0;overflow:hidden;border:3px solid var(--ink);border-radius:24px;background:linear-gradient(#8fd0ff,#e6f6ff 75%);box-shadow:0 6px 0 var(--frame-shade)}
 #gl{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
 #nogl{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;font:700 18px/1.4 var(--body)}
@@ -169,7 +169,7 @@ button{font:inherit;color:inherit}
   #side{flex-direction:row;height:100%;min-height:0}
   #bar,#colors{flex-direction:column;overflow-x:hidden;overflow-y:auto;touch-action:pan-y;padding:8px 10px 8px 4px}
   #bar{min-height:0;width:96px}
-  #colors{padding-left:2px}
+  #colors{padding:10px}
   .item,.sw{touch-action:pan-y}
   .title{font-size:44px}
 }
@@ -1036,6 +1036,32 @@ function picture(pieces, w, h, theta = 0.62, phi = 0.48) {
   tr.free(m1); tr.free(m2);
   return url;
 }
+const VIEW_STEPS = 24;
+function viewBucket() { const b = Math.round(cam.theta / (TAU / VIEW_STEPS)) % VIEW_STEPS; return (b + VIEW_STEPS) % VIEW_STEPS; }
+function freeIcon(s) {
+  const v = viewBucket(), p = { ...s, c: F.color, x: 0, y: 0, z: 0, rot: F.rot };
+  const k = 'f|' + p.kind + '|' + p.w + 'x' + p.d + '|' + p.c + '|r' + F.rot + '|v' + v;
+  if (!thumbCache.has(k)) { try { thumbCache.set(k, picture([p], 120, 120, v * TAU / VIEW_STEPS, 0.55)); } catch (e) { thumbCache.set(k, ''); } }
+  return thumbCache.get(k);
+}
+let iconGen = 0, iconView = -1;
+function refreshFreeIcons() {
+  if (mode !== 'free') return;
+  const gen = ++iconGen;
+  iconView = viewBucket();
+  const items = [...bar.querySelectorAll('.item')].sort((a, b) => (b.getAttribute('aria-pressed') === 'true') - (a.getAttribute('aria-pressed') === 'true'));
+  let i = 0;
+  const step = () => {
+    if (gen !== iconGen || mode !== 'free') return;
+    const t0 = now();
+    while (i < items.length && now() - t0 < 8) {
+      const b = items[i++], img = b.querySelector('img'), src = freeIcon(FREE_PIECES[b._piece]);
+      if (img.getAttribute('src') !== src) img.src = src;
+    }
+    if (i < items.length) requestAnimationFrame(step);
+  };
+  step();
+}
 function pieceIcon(p) {
   const show = { ...p, x: 0, y: 0, z: 0, rot: 0 };
   if (show.kind === 'brick' && show.w < show.d) { show.w = p.d; show.d = p.w; }
@@ -1291,7 +1317,7 @@ function startFree(fromTemplate) {
   showBuild();
   setMesh('base', baseGeo(F.W, F.D, BASES.grass));
   cam.bounds = [0, 0, 0, F.W, 3, F.D];
-  requestAnimationFrame(() => { sizeCanvas(); fitView(); });
+  requestAnimationFrame(() => { sizeCanvas(); fitView(); refreshFreeIcons(); });
   rebuild(); renderBar(); renderColors(); updateProgress(); updateTools();
   toast(F.pieces.length ? 'Tap to add bricks. Drag to spin!' : 'Pick a piece and a color, then tap the green plate', 2800);
 }
@@ -1377,11 +1403,11 @@ function rebuild() { if (mode === 'tpl') rebuildTemplate(); else if (mode === 'f
    Piece bar + colors
    ===================================================================== */
 const bar = $('#bar');
-function itemButton(p, count, key, label) {
+function itemButton(p, count, key, label, src) {
   const b = document.createElement('button');
   b.type = 'button'; b.className = 'item'; b.dataset.key = key;
   b.setAttribute('aria-label', label + (count != null ? `, ${count} left` : ''));
-  const img = document.createElement('img'); img.alt = ''; img.src = pieceIcon(p); img.draggable = false; b.appendChild(img);
+  const img = document.createElement('img'); img.alt = ''; img.src = src || pieceIcon(p); img.draggable = false; b.appendChild(img);
   if (count != null) { const n = document.createElement('span'); n.className = 'n'; n.textContent = String(count); b.appendChild(n); }
   wireDrag(b);
   return b;
@@ -1398,9 +1424,10 @@ function renderBar() {
       bar.appendChild(b);
     }
   } else {
+    iconView = viewBucket();
     FREE_PIECES.forEach((s, idx) => {
       const p = { ...s, c: F.color, x: 0, y: 0, z: 0, rot: 0 };
-      const b = itemButton(p, null, 'f' + idx, pieceLabel(p));
+      const b = itemButton(p, null, 'f' + idx, pieceLabel(p), freeIcon(s));
       b.setAttribute('aria-pressed', String(!F.erase && F.sel === idx));
       b._tap = () => { F.sel = idx; F.erase = false; Sound.pop(); updateSel(); updateTools(); };
       b._piece = idx;
@@ -1530,7 +1557,7 @@ function ptrEnd(e) {
   else if (gest && gest.type === 'tap') pressCancel();
   pts.delete(e.pointerId);
   if (pts.size === 1 && gest && gest.type === 'pinch') gest = { type: 'orbit', id: [...pts.keys()][0] };
-  if (pts.size === 0) gest = null;
+  if (pts.size === 0) { gest = null; if (mode === 'free' && viewBucket() !== iconView) refreshFreeIcons(); }
 }
 canvas.addEventListener('pointerup', ptrEnd);
 canvas.addEventListener('pointercancel', ptrEnd);
@@ -1672,12 +1699,12 @@ function confetti() {
 $('#homeBtn').addEventListener('click', goHome);
 $('#freeBtn').addEventListener('click', () => { Sound.pop(); loadFree(); F.undo = []; startFree(false); });
 $('#helpBtn').addEventListener('click', tplHelp);
-$('#viewBtn').addEventListener('click', () => { fitView(); Sound.click(); });
+$('#viewBtn').addEventListener('click', () => { fitView(); Sound.click(); refreshFreeIcons(); });
 $('#photoBtn').addEventListener('click', savePicture);
 $('#snapBtn').addEventListener('click', savePicture);
 $('#anotherBtn').addEventListener('click', goHome);
 $('#playBtn').addEventListener('click', () => { Sound.pop(); startFree(true); });
-$('#rotBtn').addEventListener('click', () => { F.rot = (F.rot + 1) % 4; Sound.click(); updateTools(); bump($('#rotBtn')); });
+$('#rotBtn').addEventListener('click', () => { F.rot = (F.rot + 1) % 4; Sound.click(); updateTools(); bump($('#rotBtn')); refreshFreeIcons(); });
 $('#eraseBtn').addEventListener('click', () => { F.erase = !F.erase; Sound.click(); updateSel(); updateTools(); if (F.erase) toast('Tap a brick to take it off'); });
 $('#undoBtn').addEventListener('click', freeUndo);
 (() => {
