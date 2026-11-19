@@ -1629,6 +1629,14 @@ function renderHome() {
 /* =====================================================================
    Saving a picture
    ===================================================================== */
+// Pictures are never handed to the phone's share sheet (it offers Messages, Mail and so on).
+// iPhone home-screen apps also can't download files reliably (the app can get stuck on a
+// download screen), so there the pictures stay inside the game.
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const FRAMED = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+const STANDALONE = (() => { try { return navigator.standalone === true || matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches; } catch (e) { return false; } })();
+const canDownload = () => !FRAMED && !(IS_IOS && STANDALONE);
+const phoneSaveAvailable = () => !!(window.claude && typeof window.claude.use === 'function') || canDownload();
 let dlNS, dlPromise = null;
 function getDownloads() {
   if (dlPromise) return dlPromise;
@@ -1643,18 +1651,12 @@ async function saveToPhone(blob, name) {
     try { await dl.save({ filename: name, data: blob }); toast('Saved to your phone!'); Sound.layer(); return; }
     catch (err) { const code = err && err.code; if (code === 'declined') return; if (code === 'rate_limited') { toast('One moment, then try again.'); return; } }
   }
-  const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const framed = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
-  if (isIOS) {
-    try { const file = new File([blob], name, { type: 'image/png' }); if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'My build' }); return; } }
-    catch (err) { if (err && err.name === 'AbortError') return; }
-  }
-  if (!framed) {
+  if (canDownload()) {
     try {
       const u = URL.createObjectURL(blob), a = document.createElement('a');
       a.href = u; a.download = name; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(u), 10000);
-      toast(isIOS ? 'Saved to your Files app (Downloads).' : 'Saved! Look in Downloads or your Photos app.'); return;
+      toast(IS_IOS ? 'Saved to the Files app, in Downloads.' : 'Saved! Look in Downloads or your Photos app.'); return;
     } catch (e) {}
   }
   toast('Saving pictures does not work here, sorry!');
@@ -1738,6 +1740,7 @@ function start(snap) {
   renderHome();
   if (!R) $('#grid').insertAdjacentHTML('afterbegin', '<p style="grid-column:1/-1;font:700 17px/1.4 var(--body)">This device can\'t show 3D right now. Try a newer browser.</p>');
   getDownloads();
+  if (!phoneSaveAvailable()) { $('#photoBtn').hidden = true; $('#snapBtn').hidden = true; }
   if (snap.screen === 'tpl') { const def = TPL.find(d => d.id === snap.id); if (def) startTemplate(def); }
   else if (snap.screen === 'free') startFree(false);
   try {

@@ -157,8 +157,7 @@ body.night .mirror-line{border-left-color:rgba(255,255,255,.28)}
 
 #viewer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;gap:14px;background:var(--dots),var(--album);
   padding:calc(env(safe-area-inset-top) + 12px) calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 16px) calc(env(safe-area-inset-left) + 16px)}
-#viewImg{flex:1 1 auto;min-height:0;max-width:100%;object-fit:contain;border:3px solid var(--ink);border-radius:16px;background:#fff;box-shadow:0 6px 0 var(--ink);
-  -webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}
+#viewImg{flex:1 1 auto;min-height:0;max-width:100%;object-fit:contain;border:3px solid var(--ink);border-radius:16px;background:#fff;box-shadow:0 6px 0 var(--ink);pointer-events:none}
 #viewDate{margin:0;font:700 15px/1 var(--body);opacity:.75}
 .actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
 .pill{
@@ -728,7 +727,7 @@ ink.addEventListener('lostpointercapture', endPointer);
 ink.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
 ink.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 document.addEventListener('gesturestart', e => e.preventDefault());
-document.addEventListener('contextmenu', e => { if (!e.target.closest('#viewImg')) e.preventDefault(); });
+document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('dblclick', e => e.preventDefault());
 
 /* ================= UI helpers ================= */
@@ -859,6 +858,14 @@ function fmtDate(ts) {
   catch (e) { return new Date(ts).toString(); }
 }
 
+// Pictures are never handed to the phone's share sheet (it offers Messages, Mail and so on).
+// iPhone home-screen apps also can't download files reliably (the app can get stuck on a
+// download screen), so there the pictures stay inside the game.
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const FRAMED = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+const STANDALONE = (() => { try { return navigator.standalone === true || matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches; } catch (e) { return false; } })();
+const canDownload = () => !FRAMED && !(IS_IOS && STANDALONE);
+const phoneSaveAvailable = () => !!(window.claude && typeof window.claude.use === 'function') || canDownload();
 let dlNS, dlPromise = null;
 function getDownloads() {
   if (dlPromise) return dlPromise;
@@ -882,30 +889,18 @@ async function saveToPhone(blob, name) {
       if (code === 'rate_limited') { toast('One moment, then try again.'); return; }
     }
   }
-  const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const framed = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
-  if (isIOS) {
-    // iPhone: the share sheet has "Save Image", which puts it in Photos
-    try {
-      const file = new File([blob], name, { type: 'image/png' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'My drawing' });
-        return;
-      }
-    } catch (err) { if (err && err.name === 'AbortError') return; }
-  }
-  if (!framed) {
+  if (canDownload()) {
     // Android and computers: a normal download lands in Downloads, which shows up in Photos/Gallery
     try {
       const u = URL.createObjectURL(blob), a = document.createElement('a');
       a.href = u; a.download = name; a.rel = 'noopener';
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(u), 10000);
-      toast(isIOS ? 'Saved to your Files app (Downloads).' : 'Saved! Look in Downloads or your Photos app.'); Sound.tada();
+      toast(IS_IOS ? 'Saved to the Files app, in Downloads.' : 'Saved! Look in Downloads or your Photos app.'); Sound.tada();
       return;
     } catch (e) {}
   }
-  toast('To keep it: open the picture in My Pictures, then press and hold it.');
+  toast('Your picture is kept in My Pictures.');
 }
 
 let picCount = 0;
@@ -951,7 +946,7 @@ async function snapPicture() {
     await Store.addPic(rec);
     picCount++;
     setTimeout(() => { updateBadge(); bump($('#galleryBtn')); Sound.tada(); }, reduceMotion ? 0 : 700);
-    toast('Saved in My Pictures!', { label: 'Save to phone', fn: () => saveToPhone(blob, fileName(rec.created)) });
+    toast('Saved in My Pictures!', phoneSaveAvailable() ? { label: 'Save to phone', fn: () => saveToPhone(blob, fileName(rec.created)) } : undefined);
   } catch (e) {
     toast('That picture could not be saved. Try again.');
   } finally { snapping = false; }
@@ -1020,9 +1015,12 @@ function renderGrid() {
   $('#galEmpty').hidden = pics.length > 0;
   grid.hidden = pics.length === 0;
   $('#galCount').textContent = pics.length ? `${pics.length} picture${pics.length === 1 ? '' : 's'}` : '';
-  $('#galNote').textContent = Store.persistent
-    ? 'Pictures stay in this browser. Tap one, then Save to phone to keep a copy in your photos.'
-    : 'Pictures are only kept until this page closes. Tap one, then Save to phone to keep it.';
+  $('#vSave').hidden = !phoneSaveAvailable();
+  $('#galNote').textContent = !phoneSaveAvailable()
+    ? (Store.persistent ? 'Your pictures are kept here in My Pictures.' : 'Pictures are only kept until this page closes.')
+    : Store.persistent
+      ? 'Pictures stay in this browser. Tap one, then Save to phone to keep a copy in your photos.'
+      : 'Pictures are only kept until this page closes. Tap one, then Save to phone to keep it.';
   pics.forEach((p, i) => {
     const u = URL.createObjectURL(p.blob); galUrls.push(u);
     const b = document.createElement('button');
