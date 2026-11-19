@@ -1,7 +1,7 @@
 // Offline support for Rainbow Doodle, Trace Champ and Brick Builder.
 // Everything is served from the cache first so the games open instantly with no internet,
 // and refreshed in the background so updates arrive on the next launch.
-const VERSION = 'kids-games-v3';
+const VERSION = 'kids-games-v4';
 const FONTS = 'kids-games-fonts';
 const CORE = [
   './',

@@ -163,6 +163,35 @@ button{font:inherit;color:inherit}
   transform:translate(-50%,-14px);opacity:0;pointer-events:none;transition:transform .22s ease,opacity .22s ease;
 }
 #toast.show{transform:translate(-50%,0);opacity:1}
+#toast{display:flex;align-items:center;gap:10px}
+#toast button{flex:0 0 auto;border:2px solid #fff;background:var(--gold);color:var(--ink);font:800 15px/1 var(--body);padding:9px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+#toast.show button{pointer-events:auto}
+
+/* ---------- my pictures ---------- */
+.home-stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.pics-btn{cursor:pointer;touch-action:manipulation}
+.pics-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.pics-btn b{min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--pop);color:#fff;font:800 13px/22px var(--body);text-align:center}
+#gallery{position:fixed;inset:0;z-index:45;display:flex;flex-direction:column;gap:12px;
+  padding:calc(env(safe-area-inset-top) + 12px) calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 16px) calc(env(safe-area-inset-left) + 16px);
+  background:var(--dots),#ffbe7a}
+.sheet-head{display:flex;align-items:center;gap:12px}
+.sheet-head h2{margin:0;font:400 clamp(28px,8vw,38px)/1 var(--display);letter-spacing:.5px}
+.sheet-head .count{font:800 16px/1 var(--body);opacity:.7;font-variant-numeric:tabular-nums}
+.sheet-head .key{margin-left:auto;width:48px;height:46px}
+.sheet-head .key svg{width:60%;height:60%}
+.gal-note{margin:0;font:600 15px/1.35 var(--body);max-width:60ch}
+#galGrid{flex:1 1 auto;min-height:0;overflow-y:auto;touch-action:pan-y;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:18px;padding:8px 6px 20px;align-content:start}
+.thumb{display:flex;flex-direction:column;gap:4px;padding:8px 8px 10px;background:#fff;border:3px solid var(--ink);border-radius:14px;box-shadow:0 5px 0 var(--ink);rotate:var(--tilt,0deg);cursor:pointer;touch-action:pan-y;font:800 14px/1.1 var(--body);text-align:left}
+.thumb img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:6px;border:2px solid rgba(35,26,79,.2);pointer-events:none}
+.empty{flex:1 1 auto;display:grid;place-content:center;justify-items:center;gap:12px;text-align:center;font:700 20px/1.3 var(--body)}
+.empty svg{width:96px;height:96px}
+#viewer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;gap:14px;background:var(--dots),#ffbe7a;
+  padding:calc(env(safe-area-inset-top) + 12px) calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 16px) calc(env(safe-area-inset-left) + 16px)}
+#viewImg{flex:1 1 auto;min-height:0;max-width:100%;object-fit:contain;border:3px solid var(--ink);border-radius:16px;background:#fff;box-shadow:0 6px 0 var(--ink);pointer-events:none}
+#viewDate{margin:0;font:700 15px/1.2 var(--body);text-align:center}
+.vacts{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.pill .label{position:relative}
 
 @media (orientation: landscape) and (max-height: 600px){
   #build{grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"head head" "side stage" "side tools"}
@@ -192,7 +221,10 @@ button{font:inherit;color:inherit}
 <section id="home" class="screen" aria-label="Choose something to build">
   <header class="home-head">
     <h1 class="title" aria-label="Brick Builder"><span class="w" aria-hidden="true"><span>B</span><span>r</span><span>i</span><span>c</span><span>k</span></span><span class="w" aria-hidden="true"><span>B</span><span>u</span><span>i</span><span>l</span><span>d</span><span>e</span><span>r</span></span></h1>
-    <span class="chip"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg><span><b id="builtCount">0</b> of <b id="tplCount">0</b> built</span></span>
+    <div class="home-stats">
+      <span class="chip"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg><span><b id="builtCount">0</b> of <b id="tplCount">0</b> built</span></span>
+      <button id="picsBtn" class="chip pics-btn" type="button" aria-label="My pictures"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="9" width="36" height="30" rx="5" fill="#fff" stroke="#231a4f" stroke-width="3"/><path d="M9 36l10-12 7 8 4-4 9 8z" fill="#3ccf7a" stroke="#231a4f" stroke-width="2.5" stroke-linejoin="round"/><circle cx="33" cy="17" r="4" fill="#ffd23f" stroke="#231a4f" stroke-width="2.5"/></svg>My Pictures<b id="picCount" hidden>0</b></button>
+    </div>
   </header>
   <button id="freeBtn" class="free-card" type="button">
     <img id="freeThumb" alt="">
@@ -263,9 +295,34 @@ button{font:inherit;color:inherit}
   </nav>
 </section>
 
+<section id="gallery" aria-label="My pictures" hidden>
+  <div class="sheet-head">
+    <h2>My Pictures</h2>
+    <span class="count" id="galCount"></span>
+    <button id="galClose" class="key" type="button" aria-label="Close My Pictures" title="Close">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M13 13l22 22M35 13 13 35" stroke="currentColor" stroke-width="5.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <p class="gal-note" id="galNote"></p>
+  <div id="galGrid"></div>
+  <div class="empty" id="galEmpty">
+    <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M16 15l3-6h10l3 6" fill="#ffa24d" stroke="#231a4f" stroke-width="2.5" stroke-linejoin="round"/><rect x="5" y="15" width="38" height="25" rx="6" fill="#ff7aa8" stroke="#231a4f" stroke-width="2.5"/><circle cx="24" cy="27.5" r="8" fill="#bfe8ff" stroke="#231a4f" stroke-width="2.5"/><circle cx="21.5" cy="25" r="2.2" fill="#fff"/></svg>
+    <span>No pictures yet.<br>Tap the camera while you build!</span>
+  </div>
+  <div id="viewer" hidden>
+    <img id="viewImg" alt="Saved build">
+    <p id="viewDate"></p>
+    <div class="vacts">
+      <button id="vBack" class="pill" type="button">Back</button>
+      <button id="vSave" class="pill primary" type="button">Save to phone</button>
+      <button id="vDel" class="pill hold" type="button" aria-label="Delete picture (press and hold)"><span class="fill"></span><span class="label">Hold to delete</span></button>
+    </div>
+  </div>
+</section>
+
 <img id="dragImg" alt="" hidden>
 <canvas id="confetti" aria-hidden="true"></canvas>
-<div id="toast" role="status" aria-live="polite"></div>
+<div id="toast" role="status" aria-live="polite"><span class="msg"></span><button type="button" hidden></button></div>
 
 <script>
 (() => {
@@ -1004,7 +1061,13 @@ const Sound = {
 ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'].forEach(t => document.addEventListener(t, () => Sound.unlock(), { capture: true, passive: true }));
 const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
 let toastTimer = 0;
-function toast(msg, ms = 2400) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), ms); }
+function toast(msg, ms = 2400, action) {
+  const t = $('#toast'), b = t.querySelector('button');
+  t.querySelector('.msg').textContent = msg;
+  if (action) { b.hidden = false; b.textContent = action.label; b.onclick = () => { t.classList.remove('show'); action.fn(); }; }
+  else { b.hidden = true; b.onclick = null; }
+  t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), action ? 6500 : ms);
+}
 function bump(el, cls = 'bump') { if (reduceMotion || !el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
 
 /* =====================================================================
@@ -1629,51 +1692,137 @@ function renderHome() {
 /* =====================================================================
    Saving a picture
    ===================================================================== */
-// Pictures are never handed to the phone's share sheet (it offers Messages, Mail and so on).
-// iPhone home-screen apps also can't download files reliably (the app can get stuck on a
-// download screen), so there the pictures stay inside the game.
+// Saving only ever keeps pictures on this device. Nothing here opens the share sheet,
+// Claude's save prompt, or anything else that could send a picture somewhere.
+// iPhone home-screen apps can't download files reliably (the app can get stuck on a
+// download screen), so there pictures stay inside the game's own My Pictures.
 const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const FRAMED = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
 const STANDALONE = (() => { try { return navigator.standalone === true || matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches; } catch (e) { return false; } })();
 const canDownload = () => !FRAMED && !(IS_IOS && STANDALONE);
-const phoneSaveAvailable = () => !!(window.claude && typeof window.claude.use === 'function') || canDownload();
-let dlNS, dlPromise = null;
-function getDownloads() {
-  if (dlPromise) return dlPromise;
-  try { const c = window.claude; dlPromise = c && typeof c.use === 'function' ? Promise.resolve(c.use('downloads')).catch(() => null) : Promise.resolve(null); }
-  catch (e) { dlPromise = Promise.resolve(null); }
-  dlPromise.then(d => { dlNS = d || null; });
-  return dlPromise;
-}
-async function saveToPhone(blob, name) {
-  const dl = dlNS !== undefined ? dlNS : await getDownloads();
-  if (dl) {
-    try { await dl.save({ filename: name, data: blob }); toast('Saved to your phone!'); Sound.layer(); return; }
-    catch (err) { const code = err && err.code; if (code === 'declined') return; if (code === 'rate_limited') { toast('One moment, then try again.'); return; } }
+const phoneSaveAvailable = () => canDownload();
+
+/* pictures live in this browser's storage on the device (IndexedDB, or memory if that is unavailable) */
+const PicStore = (() => {
+  let dbp = null, useMem = false;
+  const mem = { pics: [], nextId: 1 };
+  function open() {
+    if (dbp) return dbp;
+    dbp = new Promise((res, rej) => {
+      const timer = setTimeout(() => rej(new Error('timeout')), 3000);
+      try {
+        if (!window.indexedDB) throw new Error('no indexedDB');
+        const r = indexedDB.open('brick-builder-pictures', 1);
+        r.onupgradeneeded = () => { const d = r.result; if (!d.objectStoreNames.contains('pics')) d.createObjectStore('pics', { keyPath: 'id', autoIncrement: true }); };
+        r.onsuccess = () => { clearTimeout(timer); res(r.result); };
+        r.onerror = () => { clearTimeout(timer); rej(r.error); };
+        r.onblocked = () => { clearTimeout(timer); rej(new Error('blocked')); };
+      } catch (e) { clearTimeout(timer); rej(e); }
+    });
+    return dbp;
   }
-  if (canDownload()) {
-    try {
-      const u = URL.createObjectURL(blob), a = document.createElement('a');
-      a.href = u; a.download = name; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(u), 10000);
-      toast(IS_IOS ? 'Saved to the Files app, in Downloads.' : 'Saved! Look in Downloads or your Photos app.'); return;
-    } catch (e) {}
+  function req(mode, fn) {
+    return open().then(db => new Promise((res, rej) => {
+      let out; const t = db.transaction('pics', mode), r = fn(t.objectStore('pics'));
+      if (r) r.onsuccess = () => { out = r.result; };
+      t.oncomplete = () => res(out); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error);
+    }));
   }
-  toast('Saving pictures does not work here, sorry!');
+  async function safe(dbFn, memFn) { if (useMem) return memFn(); try { return await dbFn(); } catch (e) { useMem = true; return memFn(); } }
+  return {
+    add: rec => safe(() => req('readwrite', s => s.add(rec)), () => { rec.id = mem.nextId++; mem.pics.push(rec); return rec.id; }),
+    all: () => safe(() => req('readonly', s => s.getAll()), () => mem.pics.slice()),
+    del: id => safe(() => req('readwrite', s => s.delete(id)), () => { mem.pics = mem.pics.filter(p => p.id !== id); }),
+    get persistent() { return !useMem; }
+  };
+})();
+const pad2 = n => String(n).padStart(2, '0');
+function picFileName(rec) {
+  const d = new Date(rec.created);
+  return `brick-builder-${rec.slug || 'build'}-${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}-${pad2(d.getHours())}${pad2(d.getMinutes())}.png`;
 }
+function downloadToDevice(blob, name) {
+  if (!canDownload()) { toast('Your picture is kept in My Pictures.'); return; }
+  try {
+    const u = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = u; a.download = name; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(u), 10000);
+    toast(IS_IOS ? 'Saved to the Files app, in Downloads.' : 'Saved! Look in Downloads or your Photos app.');
+  } catch (e) { toast('Your picture is kept in My Pictures.'); }
+}
+let picCount = 0, snapping = false;
+function updatePicCount() { const b = $('#picCount'); b.textContent = String(picCount); b.hidden = picCount <= 0; }
 function savePicture() {
-  if (!R) return;
+  if (!R || snapping) return;
+  snapping = true;
   setMesh('preview', null);
   frame(); // draw a fresh frame, then copy it right away
   const c = document.createElement('canvas'); c.width = canvas.width; c.height = canvas.height;
   const g = c.getContext('2d'), grd = g.createLinearGradient(0, 0, 0, c.height);
   grd.addColorStop(0, '#8fd0ff'); grd.addColorStop(0.75, '#e6f6ff'); grd.addColorStop(1, '#e6f6ff');
   g.fillStyle = grd; g.fillRect(0, 0, c.width, c.height); g.drawImage(canvas, 0, 0);
-  const d = new Date(), pad = n => String(n).padStart(2, '0');
-  const name = `brick-builder-${(TS ? TS.def.id : 'free')}-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.png`;
-  c.toBlob(b => { if (b) saveToPhone(b, name); }, 'image/png');
   const f = $('#stage'); f.animate && !reduceMotion && f.animate([{ filter: 'brightness(1.8)' }, { filter: 'brightness(1)' }], { duration: 350 });
+  Sound.noise(0.08, { vol: 0.3, f1: 3200, f2: 1600, q: 0.8 }); Sound.noise(0.07, { vol: 0.22, f1: 2200, f2: 900, q: 0.8, delay: 0.09 });
+  const rec = { created: Date.now(), name: TS ? TS.def.name : 'Free Build', slug: TS ? TS.def.id : 'free' };
+  c.toBlob(async b => {
+    try {
+      if (!b) throw new Error('no picture');
+      rec.blob = b;
+      await PicStore.add(rec);
+      picCount++; updatePicCount();
+      toast('Saved in My Pictures!', 2400, canDownload() ? { label: 'Save to phone', fn: () => downloadToDevice(b, picFileName(rec)) } : null);
+      Sound.layer();
+    } catch (e) { toast('That picture could not be saved. Try again.'); }
+    snapping = false;
+  }, 'image/png');
+}
+
+/* ---- My Pictures ---- */
+let gPics = [], galUrls = [], viewing = null;
+const fmtDate = ts => { try { return new Date(ts).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); } catch (e) { return new Date(ts).toString(); } };
+function revokeGal() { galUrls.forEach(u => URL.revokeObjectURL(u)); galUrls = []; }
+function renderGallery() {
+  revokeGal();
+  const grid = $('#galGrid'); grid.textContent = '';
+  $('#galEmpty').hidden = gPics.length > 0; grid.hidden = gPics.length === 0;
+  $('#galCount').textContent = gPics.length ? `${gPics.length} picture${gPics.length === 1 ? '' : 's'}` : '';
+  $('#galNote').textContent = !PicStore.persistent ? 'Pictures are only kept until this page closes.'
+    : canDownload() ? 'Pictures are kept on this device. Tap one, then Save to phone to put a copy in your Downloads.'
+    : 'Your pictures are kept here on this device.';
+  gPics.forEach((p, i) => {
+    const u = URL.createObjectURL(p.blob); galUrls.push(u);
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'thumb'; b.style.setProperty('--tilt', ((i % 3) - 1) * 2 + 'deg');
+    b.setAttribute('aria-label', `${p.name || 'Build'}, ${fmtDate(p.created)}`);
+    const im = document.createElement('img'); im.src = u; im.alt = ''; im.decoding = 'async'; im.draggable = false;
+    const nm = document.createElement('span'); nm.textContent = p.name || 'Build';
+    b.append(im, nm);
+    b.addEventListener('click', () => { viewing = p; $('#viewImg').src = u; $('#viewDate').textContent = `${p.name || 'Build'} · ${fmtDate(p.created)}`; $('#vSave').hidden = !canDownload(); $('#viewer').hidden = false; Sound.pop(); });
+    grid.appendChild(b);
+  });
+}
+async function openGallery() {
   Sound.click();
+  try { gPics = (await PicStore.all()) || []; } catch (e) { gPics = []; }
+  gPics.sort((a, b) => b.created - a.created);
+  picCount = gPics.length; updatePicCount();
+  renderGallery(); $('#viewer').hidden = true; $('#gallery').hidden = false;
+}
+function closeGallery() { $('#gallery').hidden = true; $('#viewer').hidden = true; $('#viewImg').removeAttribute('src'); revokeGal(); Sound.click(); }
+async function deleteViewing() {
+  if (!viewing) return;
+  const id = viewing.id;
+  try { await PicStore.del(id); } catch (e) {}
+  gPics = gPics.filter(p => p.id !== id); picCount = gPics.length; updatePicCount();
+  viewing = null; $('#viewer').hidden = true; $('#viewImg').removeAttribute('src');
+  renderGallery(); Sound.whoosh();
+}
+function makeHold(btn, ms, done, tapMsg) {
+  let timer = 0, fired = false;
+  btn.addEventListener('pointerdown', e => { e.preventDefault(); fired = false; btn.classList.add('holding'); try { btn.setPointerCapture(e.pointerId); } catch (_) {} timer = setTimeout(() => { timer = 0; fired = true; btn.classList.remove('holding'); done(); }, ms); });
+  const stop = () => { if (!timer) return; clearTimeout(timer); timer = 0; btn.classList.remove('holding'); if (!fired && tapMsg) { toast(tapMsg); Sound.click(); } };
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => btn.addEventListener(t, stop));
+  btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); done(); } });
 }
 
 /* =====================================================================
@@ -1703,6 +1852,11 @@ $('#freeBtn').addEventListener('click', () => { Sound.pop(); loadFree(); F.undo 
 $('#helpBtn').addEventListener('click', tplHelp);
 $('#viewBtn').addEventListener('click', () => { fitView(); Sound.click(); refreshFreeIcons(); });
 $('#photoBtn').addEventListener('click', savePicture);
+$('#picsBtn').addEventListener('click', openGallery);
+$('#galClose').addEventListener('click', closeGallery);
+$('#vBack').addEventListener('click', () => { $('#viewer').hidden = true; Sound.click(); });
+$('#vSave').addEventListener('click', () => { if (viewing) downloadToDevice(viewing.blob, picFileName(viewing)); });
+makeHold($('#vDel'), 800, deleteViewing, 'Press and hold to delete');
 $('#snapBtn').addEventListener('click', savePicture);
 $('#anotherBtn').addEventListener('click', goHome);
 $('#playBtn').addEventListener('click', () => { Sound.pop(); startFree(true); });
@@ -1722,6 +1876,9 @@ document.addEventListener('keydown', e => {
   if (e.key === 'r' && mode === 'free') $('#rotBtn').click();
   if (e.key === 'Escape') goHome();
 });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !$('#gallery').hidden) { if (!$('#viewer').hidden) $('#viewer').hidden = true; else closeGallery(); }
+});
 
 /* =====================================================================
    Boot
@@ -1739,8 +1896,7 @@ function start(snap) {
   ], 200, 160, 0.55, 0.42); } catch (e) {}
   renderHome();
   if (!R) $('#grid').insertAdjacentHTML('afterbegin', '<p style="grid-column:1/-1;font:700 17px/1.4 var(--body)">This device can\'t show 3D right now. Try a newer browser.</p>');
-  getDownloads();
-  if (!phoneSaveAvailable()) { $('#photoBtn').hidden = true; $('#snapBtn').hidden = true; }
+  PicStore.all().then(p => { picCount = (p || []).length; updatePicCount(); }).catch(() => {});
   if (snap.screen === 'tpl') { const def = TPL.find(d => d.id === snap.id); if (def) startTemplate(def); }
   else if (snap.screen === 'free') startFree(false);
   try {

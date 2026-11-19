@@ -858,37 +858,16 @@ function fmtDate(ts) {
   catch (e) { return new Date(ts).toString(); }
 }
 
-// Pictures are never handed to the phone's share sheet (it offers Messages, Mail and so on).
-// iPhone home-screen apps also can't download files reliably (the app can get stuck on a
-// download screen), so there the pictures stay inside the game.
+// Saving only ever keeps pictures on this device. Nothing here opens the share sheet,
+// Claude's save prompt, or anything else that could send a picture somewhere.
+// iPhone home-screen apps can't download files reliably (the app can get stuck on a
+// download screen), so there pictures stay inside the game's own My Pictures.
 const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const FRAMED = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
 const STANDALONE = (() => { try { return navigator.standalone === true || matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches; } catch (e) { return false; } })();
 const canDownload = () => !FRAMED && !(IS_IOS && STANDALONE);
-const phoneSaveAvailable = () => !!(window.claude && typeof window.claude.use === 'function') || canDownload();
-let dlNS, dlPromise = null;
-function getDownloads() {
-  if (dlPromise) return dlPromise;
-  try {
-    const c = window.claude;
-    dlPromise = c && typeof c.use === 'function' ? Promise.resolve(c.use('downloads')).catch(() => null) : Promise.resolve(null);
-  } catch (e) { dlPromise = Promise.resolve(null); }
-  dlPromise.then(d => { dlNS = d || null; });
-  return dlPromise;
-}
+const phoneSaveAvailable = () => canDownload();
 async function saveToPhone(blob, name) {
-  const dl = dlNS !== undefined ? dlNS : await getDownloads();
-  if (dl) {
-    try {
-      await dl.save({ filename: name, data: blob });
-      toast('Saved to your phone!'); Sound.tada();
-      return;
-    } catch (err) {
-      const code = err && err.code;
-      if (code === 'declined') return;
-      if (code === 'rate_limited') { toast('One moment, then try again.'); return; }
-    }
-  }
   if (canDownload()) {
     // Android and computers: a normal download lands in Downloads, which shows up in Photos/Gallery
     try {
@@ -1177,7 +1156,6 @@ async function start(data) {
   if (data.started) hideSplash(true); else runSplash();
   await restore(data);
   applyAll();
-  getDownloads();
   Store.allPics().then(p => { picCount = (p || []).length; updateBadge(); }).catch(() => {});
   try {
     const hot = window.claude && window.claude.hot;
