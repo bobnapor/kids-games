@@ -14,7 +14,7 @@
 <title>Number Pop</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Bagel+Fat+One&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
 <style>
 :root{
   /* Layout: fourth sibling of the kids' games. Grape-purple toy frame; home = a stack of
@@ -28,6 +28,7 @@
   --pop:#ff4f8b;
   --display:"Bagel Fat One","Baloo 2",ui-rounded,"Arial Rounded MT Bold",system-ui,sans-serif;
   --body:"Baloo 2",ui-rounded,"Arial Rounded MT Bold",system-ui,sans-serif;
+  --num:"Andika","Baloo 2",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;  /* made for beginning readers: plain, clear digits */
   --emoji:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
   --dots:radial-gradient(circle at 2px 2px,rgba(255,255,255,.3) 1.6px,transparent 1.9px) 0 0/16px 16px;
   color-scheme:light;
@@ -81,7 +82,7 @@ button.chip[aria-pressed="false"]{opacity:.6;text-decoration:line-through}
 }
 .mix:active{transform:translateY(3px);box-shadow:0 3px 0 var(--ink)}
 .mix .art{display:flex;gap:6px;flex:0 0 auto}
-.mix .art i{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:3px solid var(--ink);font:400 26px/1 var(--display);font-style:normal;color:#fff;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill}
+.mix .art i{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:3px solid var(--ink);font:700 26px/1 var(--num);font-style:normal;color:var(--ink)}
 .mix b{display:block;font:400 28px/1 var(--display);letter-spacing:.4px}
 .mix small{display:block;font:700 15px/1.25 var(--body);margin-top:4px}
 .modes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;flex:0 0 auto}
@@ -91,7 +92,7 @@ button.chip[aria-pressed="false"]{opacity:.6;text-decoration:line-through}
 }
 .mode:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
 .mode .ex{align-self:stretch;display:grid;place-items:center;height:64px;border-radius:14px;background:var(--c);border:3px solid var(--ink);
-  font:400 30px/1 var(--display);color:#fff;-webkit-text-stroke:2.5px var(--ink);paint-order:stroke fill;letter-spacing:1px;white-space:nowrap}
+  font:700 32px/1 var(--num);color:var(--ink);letter-spacing:1px;white-space:nowrap}
 .mode .ex.emo{font:400 26px/1 var(--emoji);-webkit-text-stroke:0;letter-spacing:-2px}
 .mode .nm{font:800 17px/1.1 var(--body)}
 .lv{display:inline-flex;gap:4px}
@@ -115,7 +116,7 @@ button.chip[aria-pressed="false"]{opacity:.6;text-decoration:line-through}
   background:#fff;border:3px solid var(--ink);border-radius:28px;box-shadow:0 6px 0 var(--frame-shade);overflow:hidden;
 }
 .prompt{margin:0;min-height:56px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;text-align:center;
-  font:400 clamp(30px,9.5vw,46px)/1.05 var(--display);letter-spacing:.5px;text-wrap:balance}
+  font:700 clamp(30px,9.5vw,46px)/1.1 var(--num);text-wrap:balance}
 .prompt .em{font-family:var(--emoji);font-size:.9em}
 .tok{display:inline-grid;place-items:center;min-width:.7em}
 .tok.q{min-width:1.3em;padding:0 .12em;border:4px dashed #b5a3ff;border-radius:16px;color:#b5a3ff;animation:qpulse 1.4s ease-in-out infinite}
@@ -123,7 +124,7 @@ button.chip[aria-pressed="false"]{opacity:.6;text-decoration:line-through}
 @keyframes qpulse{50%{transform:scale(1.08)}}
 .visual{flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;--s:44px}
 .grp{display:grid;grid-template-columns:repeat(var(--cols,5),var(--s));gap:6px;justify-content:center;padding:8px;border-radius:18px;background:#f4f0ff}
-.op{font:400 calc(var(--s) * 1.1)/1 var(--display);color:var(--ink)}
+.op{font:700 calc(var(--s) * 1.1)/1 var(--num);color:var(--ink)}
 .obj{position:relative;display:grid;place-items:center;width:var(--s);height:var(--s);padding:0;border:0;background:none;cursor:pointer;
   font:400 calc(var(--s) * .82)/1 var(--emoji);touch-action:manipulation;transition:transform .15s}
 .obj:active{transform:scale(.9)}
@@ -137,7 +138,7 @@ button.chip[aria-pressed="false"]{opacity:.6;text-decoration:line-through}
 .cell .n{position:absolute;inset:auto auto 4px auto;font:800 16px/1 var(--body);color:var(--frame-shade)}
 .seq{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .seq span{display:grid;place-items:center;width:clamp(58px,17vw,76px);height:clamp(64px,19vw,84px);border:3px solid var(--ink);border-radius:16px;background:#f4f0ff;
-  font:400 clamp(30px,9vw,42px)/1 var(--display)}
+  font:700 clamp(32px,9.5vw,44px)/1 var(--num)}
 .seq span.miss{background:#fff;border:4px dashed #b5a3ff;color:#b5a3ff;animation:qpulse 1.4s ease-in-out infinite}
 .seq span.miss.filled{border-style:solid;border-color:var(--go);color:var(--go);background:#e6fff0;animation:none}
 .seq span.lit{background:var(--gold)}
@@ -147,20 +148,23 @@ button.chip[aria-pressed="false"]{opacity:.6;text-decoration:line-through}
 }
 .side:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
 .side .grp{background:transparent;padding:0;pointer-events:none}
-.side .big{font:400 clamp(56px,18vw,84px)/1 var(--display);color:#fff;-webkit-text-stroke:4px var(--ink);paint-order:stroke fill}
+.side .big{font:700 clamp(60px,19vw,88px)/1 var(--num);color:var(--ink)}
 .side.right{background:#e6fff0;border-color:var(--go);box-shadow:0 5px 0 var(--go)}
 .side.wrong{animation:shake .45s;opacity:.45}
+.praise{position:absolute;left:50%;top:42%;z-index:5;padding:10px 20px;border:3px solid var(--ink);border-radius:999px;background:var(--gold);box-shadow:0 5px 0 var(--ink);
+  font:400 clamp(26px,8vw,36px)/1 var(--display);letter-spacing:.4px;white-space:nowrap;transform:translate(-50%,-50%);animation:cheer .5s cubic-bezier(.3,1.6,.5,1);pointer-events:none}
+@keyframes cheer{from{transform:translate(-50%,-50%) scale(.3)}}
 .answers{display:flex;gap:clamp(10px,4vw,22px);justify-content:center;flex:0 0 auto;padding-top:4px}
 .bub{
   display:grid;place-items:center;width:clamp(80px,25vw,108px);aspect-ratio:1;padding:0;border-radius:50%;cursor:pointer;touch-action:manipulation;
   background:var(--c);border:4px solid var(--ink);box-shadow:0 6px 0 var(--ink),inset -9px -11px 0 rgba(0,0,0,.09),inset 9px 9px 0 rgba(255,255,255,.4);
-  font:400 clamp(40px,12.5vw,56px)/1 var(--display);color:#fff;-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;transition:transform .1s
+  font:700 clamp(42px,13vw,58px)/1 var(--num);color:var(--ink);transition:transform .1s
 }
 .bub:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
 .bub.wrong{animation:shake .45s;opacity:.35;filter:grayscale(1);pointer-events:none}
 .bub.right{animation:popOut .55s cubic-bezier(.3,1.6,.5,1) forwards}
 @keyframes shake{20%{transform:translateX(-10px) rotate(-6deg)}40%{transform:translateX(10px) rotate(6deg)}60%{transform:translateX(-7px)}80%{transform:translateX(5px)}}
-@keyframes popOut{40%{transform:scale(1.3)}100%{transform:scale(1.12);background:var(--go)}}
+@keyframes popOut{40%{transform:scale(1.3)}100%{transform:scale(1.12);background:#8fe8ad}}
 
 /* ---------- sticker book + reward ---------- */
 #book{display:flex;flex-direction:column;gap:12px}
@@ -220,7 +224,6 @@ button.chip[aria-pressed="false"]{opacity:.6;text-decoration:line-through}
   <div id="modes" class="modes"></div>
   <div class="settings">
     <button id="sfxBtn" class="chip" type="button" aria-pressed="true"><span aria-hidden="true" style="font:400 18px/1 var(--emoji)">🔔</span>Sounds</button>
-    <button id="voiceBtn" class="chip" type="button" aria-pressed="true"><span aria-hidden="true" style="font:400 18px/1 var(--emoji)">🗣️</span>Read aloud</button>
   </div>
 </section>
 
@@ -230,11 +233,9 @@ button.chip[aria-pressed="false"]{opacity:.6;text-decoration:line-through}
     <button id="homeBtn" class="key" type="button" aria-label="Back to the start" title="Home"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-home"/></svg></button>
     <div class="mode-pill"><span id="pName">Adding</span><span class="lv" id="pLv" aria-hidden="true"></span></div>
     <span class="jar" id="jar" aria-label="Stars toward the next sticker"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg><b id="jarText">0/10</b><i><s id="jarFill"></s></i></span>
-    <button id="sayBtn" class="key" type="button" aria-label="Hear it again" title="Hear it again">
-      <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M7 19h7l10-8v26l-10-8H7z" fill="#ffd23f" stroke="#231a4f" stroke-width="3" stroke-linejoin="round"/><path d="M30 18a8 8 0 0 1 0 12M35 13a15 15 0 0 1 0 22" fill="none" stroke="#231a4f" stroke-width="3.5" stroke-linecap="round"/></svg>
-    </button>
   </header>
-  <main id="card">
+  <main id="card" style="position:relative">
+    <div id="praise" class="praise" hidden></div>
     <h2 id="prompt" class="prompt" aria-live="polite"></h2>
     <div id="visual" class="visual"></div>
     <div id="answers" class="answers" role="group" aria-label="Answers"></div>
@@ -287,8 +288,7 @@ const THINGS = [
 const STICKERS = ['🦄', '🐶', '🐱', '🐼', '🐨', '🐯', '🦁', '🐸', '🐵', '🐧', '🐢', '🐙', '🦋', '🐝', '🐞', '🦕', '🦖', '🐳', '🐬', '🦀',
   '🌈', '🌙', '☀️', '🌸', '🌻', '🍓', '🍉', '🍕', '🍩', '🧁', '🍭', '🚀', '🚂', '🚒', '🚜', '🎈', '🎸', '⚽', '🏆', '👑'];
 const PRAISE = ['Great job!', 'You got it!', 'Awesome!', 'Yes!', 'Super!', 'Way to go!', 'Nice!', 'You did it!'];
-const TRY = ['Try again!', 'Not quite. Try again!', 'Oops! Try another one.'];
-const BUB_COLORS = ['#ff7aa8', '#5bc8f5', '#7be08d'];
+const BUB_COLORS = ['#ffb6d0', '#a8e0ff', '#b3f0c1'];
 const MODES = [
   { id: 'count', name: 'Counting', ex: '🍎🍎🍎', emo: true, c: '#ff7aa8' },
   { id: 'add', name: 'Adding', ex: '2+3', c: '#5bc8f5' },
@@ -370,7 +370,7 @@ const GEN = {
 };
 
 /* =====================================================================
-   Sound effects + read-aloud (the phone's own voice only)
+   Sound effects
    ===================================================================== */
 const Sound = {
   ac: null, master: null, unlocked: false,
@@ -401,30 +401,6 @@ const Sound = {
 ['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'].forEach(t => document.addEventListener(t, () => Sound.unlock(), { capture: true, passive: true }));
 const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
 
-const Voice = {
-  voice: null, ok: 'speechSynthesis' in window,
-  pick() {
-    if (!this.ok) return;
-    // only voices that run on the phone itself, never online ones
-    const local = speechSynthesis.getVoices().filter(v => v.localService && /^en([-_]|$)/i.test(v.lang));
-    this.voice = local.find(v => /en[-_]US/i.test(v.lang) && /samantha|karen|female|zira|aria|google/i.test(v.name)) || local.find(v => /en[-_]US/i.test(v.lang)) || local[0] || null;
-  },
-  say(text, onEnd) {
-    let done = false; const fin = () => { if (!done) { done = true; onEnd && onEnd(); } };
-    if (!data.voice || !this.ok) { if (onEnd) setTimeout(fin, 900); return; }
-    if (!this.voice) this.pick();
-    if (!this.voice) { if (onEnd) setTimeout(fin, 900); return; }
-    try {
-      speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.voice = this.voice; u.lang = this.voice.lang; u.rate = 0.9; u.pitch = 1.12;
-      if (onEnd) { u.onend = fin; u.onerror = fin; setTimeout(fin, 900 + text.length * 85); }
-      speechSynthesis.speak(u);
-    } catch (e) { if (onEnd) setTimeout(fin, 900); }
-  },
-  stop() { try { if (this.ok) speechSynthesis.cancel(); } catch (e) {} }
-};
-if (Voice.ok) { try { Voice.pick(); speechSynthesis.addEventListener('voiceschanged', () => Voice.pick()); } catch (e) {} }
 
 let toastTimer = 0;
 function toast(msg, ms = 2200) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), ms); }
@@ -437,7 +413,7 @@ let mode = 'mix', P = null, cur = null, attempts = 0, locked = false, recent = [
 const later = (fn, ms) => { const t = setTimeout(fn, ms); timers.push(t); return t; };
 function clearTimers() { timers.forEach(clearTimeout); timers = []; }
 function newProblem() {
-  clearTimers(); Voice.stop();
+  clearTimers(); $('#praise').hidden = true;
   cur = mode === 'mix' ? pick(MODES).id : mode;
   const lv = lvl(cur).lv;
   let p, tries = 0;
@@ -445,7 +421,6 @@ function newProblem() {
   recent.push(cur + p.key); if (recent.length > 8) recent.shift();
   P = p; attempts = 0; locked = false; counted = 0;
   render();
-  Voice.say(P.say);
 }
 function promptHTML(p) {
   const h = $('#prompt'); h.textContent = '';
@@ -515,6 +490,7 @@ function render() {
   const lv = lvl(cur).lv;
   $('#pLv').innerHTML = [1, 2, 3].map(i => `<i class="${i <= lv ? 'on' : ''}"></i>`).join('');
   promptHTML(P);
+  $('#prompt').setAttribute('aria-label', P.say);
   renderVis(P.vis);
   const ans = $('#answers'); ans.textContent = '';
   ans.hidden = !!P.compare;
@@ -537,7 +513,7 @@ $('#visual').addEventListener('click', e => {
 function markCount(o) {
   counted++; o.dataset.counted = '1';
   const n = el('span', 'n', String(counted)); o.appendChild(n);
-  Sound.tick(); Voice.say(String(counted));
+  Sound.tick();
 }
 function hint() {
   if (!P) return;
@@ -546,7 +522,7 @@ function hint() {
   const box = $('#visual');
   if (P.vis && P.vis.type === 'seq') {
     const spans = [...box.querySelectorAll('.seq span')];
-    P.vis.seq.forEach((v, i) => later(() => { spans.forEach(s => s.classList.remove('lit')); spans[i].classList.add('lit'); Voice.say(i === P.vis.miss ? 'hmm?' : String(v)); }, 200 + i * 900));
+    P.vis.seq.forEach((v, i) => later(() => { spans.forEach(s => s.classList.remove('lit')); spans[i].classList.add('lit'); Sound.tick(); }, 200 + i * 900));
     later(() => spans.forEach(s => s.classList.remove('lit')), 200 + P.vis.seq.length * 900);
     return;
   }
@@ -560,7 +536,7 @@ function hint() {
     let delay = 250;
     box.querySelectorAll('.side').forEach(side => {
       side.querySelectorAll('.n').forEach(n => n.remove());
-      [...side.querySelectorAll('.obj')].forEach((o, i) => { later(() => { if (!locked) { o.appendChild(el('span', 'n', String(i + 1))); Sound.tick(); Voice.say(String(i + 1)); } }, delay); delay += 650; });
+      [...side.querySelectorAll('.obj')].forEach((o, i) => { later(() => { if (!locked) { o.appendChild(el('span', 'n', String(i + 1))); Sound.tick(); } }, delay); delay += 650; });
       delay += 500;
     });
     return;
@@ -580,7 +556,6 @@ function choose(v, btn) {
   attempts++;
   btn.classList.add('wrong'); btn.disabled = true;
   Sound.wrong(); buzz(20);
-  Voice.say(pick(TRY));
   if (attempts >= 2) later(hint, 1100);
 }
 function correct(btn) {
@@ -599,8 +574,8 @@ function correct(btn) {
   if (up) later(() => { Sound.levelUp(); toast('Level up! Bigger numbers!'); }, 700);
   let moved = false; const mine = P;
   const go = () => { if (moved || P !== mine || $('#play').hidden) return; moved = true; if (gotSticker) showReward(); else newProblem(); };
-  Voice.say(`${pick(PRAISE)} ${P.fact}`, () => later(go, 350));
-  later(go, 6000);
+  const pr = $('#praise'); pr.textContent = pick(PRAISE); pr.hidden = false;
+  later(go, 1500);
 }
 function updateJar() {
   const k = data.stars % 10;
@@ -622,7 +597,7 @@ function flyStar(from) {
   setTimeout(() => s.remove(), 700);
 }
 function showReward() {
-  Voice.stop();
+  $('#praise').hidden = true;
   const left = STICKERS.filter(s => !data.stickers.includes(s));
   const st = left.length ? pick(left) : pick(STICKERS);
   if (left.length) { data.stickers.push(st); persist(); }
@@ -630,10 +605,8 @@ function showReward() {
   $('#rTitle').textContent = left.length ? 'A new sticker!' : 'You have them all!';
   $('#reward').hidden = false;
   Sound.fanfare(); confetti(140); buzz(30);
-  Voice.say(left.length ? 'You got a new sticker!' : 'Wow, you have every sticker!');
 }
 $('#rOk').addEventListener('click', () => { $('#reward').hidden = true; Sound.pop(); if (!$('#play').hidden) newProblem(); });
-$('#sayBtn').addEventListener('click', () => { if (P) Voice.say(P.say); bump($('#sayBtn')); });
 
 /* =====================================================================
    Effects
@@ -690,11 +663,9 @@ function renderHome() {
     box.appendChild(b);
   }
   $('#sfxBtn').setAttribute('aria-pressed', String(data.sfx));
-  $('#voiceBtn').setAttribute('aria-pressed', String(data.voice));
-  $('#voiceBtn').hidden = !Voice.ok;
 }
 function start(m) { mode = m; Sound.pop(); show('play'); newProblem(); }
-function goHome() { clearTimers(); Voice.stop(); P = null; $('#reward').hidden = true; show('home'); renderHome(); }
+function goHome() { clearTimers(); P = null; $('#reward').hidden = true; show('home'); renderHome(); }
 function renderBook() {
   const box = $('#stickers'); box.textContent = '';
   for (const s of STICKERS) {
@@ -710,7 +681,6 @@ $('#homeBtn').addEventListener('click', () => { Sound.pop(); goHome(); });
 $('#bookBtn').addEventListener('click', () => { Sound.pop(); renderBook(); show('book'); });
 $('#bookBack').addEventListener('click', () => { Sound.pop(); goHome(); });
 $('#sfxBtn').addEventListener('click', () => { data.sfx = !data.sfx; persist(); renderHome(); Sound.pop(); });
-$('#voiceBtn').addEventListener('click', () => { data.voice = !data.voice; persist(); renderHome(); if (data.voice) Voice.say('I will read the problems to you.'); else Voice.stop(); });
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('gesturestart', e => e.preventDefault());
 document.addEventListener('keydown', e => {
