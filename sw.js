@@ -1,7 +1,7 @@
-// Offline support for Rainbow Doodle, Trace Champ, Brick Builder and Number Pop.
+// Offline support for Rainbow Doodle, Trace Champ, Brick Builder, Number Pop and Holiday House.
 // Everything is served from the cache first so the games open instantly with no internet,
 // and refreshed in the background so updates arrive on the next launch.
-const VERSION = 'kids-games-v7';
+const VERSION = 'kids-games-v8';
 const FONTS = 'kids-games-fonts';
 const CORE = [
   './',
@@ -34,7 +34,13 @@ const CORE = [
   './number-pop/icon-192.png',
   './number-pop/icon-512.png',
   './number-pop/icon-maskable-512.png',
-  './number-pop/apple-touch-icon.png'
+  './number-pop/apple-touch-icon.png',
+  './holiday-house/',
+  './holiday-house/manifest.webmanifest',
+  './holiday-house/icon-192.png',
+  './holiday-house/icon-512.png',
+  './holiday-house/icon-maskable-512.png',
+  './holiday-house/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', event => {
