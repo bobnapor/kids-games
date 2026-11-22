@@ -120,7 +120,7 @@ button{font:inherit;color:inherit}
 #colors{padding:10px 8px 10px}
 #build.tpl #colors{display:none}
 .item{
-  position:relative;flex:0 0 auto;width:70px;height:70px;display:grid;place-items:center;padding:0;cursor:pointer;touch-action:pan-x;
+  position:relative;flex:0 0 auto;width:70px;height:70px;display:grid;place-items:center;padding:0;cursor:pointer;touch-action:none;
   border:3px solid var(--ink);border-radius:16px;background:var(--key);box-shadow:0 4px 0 var(--ink);transition:transform .1s,box-shadow .1s,background-color .15s,opacity .2s;
 }
 .item img{width:60px;height:60px;pointer-events:none;-webkit-user-drag:none}
@@ -199,7 +199,7 @@ button{font:inherit;color:inherit}
   #bar,#colors{flex-direction:column;overflow-x:hidden;overflow-y:auto;touch-action:pan-y;padding:8px 10px 8px 4px}
   #bar{min-height:0;width:96px}
   #colors{padding:10px}
-  .item,.sw{touch-action:pan-y}
+  .sw{touch-action:pan-y}
   .title{font-size:44px}
 }
 @media (prefers-reduced-motion: reduce){
@@ -1515,47 +1515,94 @@ function renderColors() {
   }
 }
 
-/* drag a piece from the bar onto the stage (a tap still just selects it) */
+/* drag a piece from the bar onto the stage (a tap still just selects it).
+   The pieces handle their own sliding of the bar, so the browser never grabs a drag
+   that starts a little sideways and drops the piece. */
 const dragImg = $('#dragImg');
 function overStage(x, y) { const r = stage.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; }
 function stageXY(x, y) { const r = stage.getBoundingClientRect(); return [x - r.left, y - r.top]; }
+let barFling = 0;
+function flingBar(v, vert) {
+  cancelAnimationFrame(barFling);
+  if (reduceMotion || Math.abs(v) < 0.15) return;
+  let last = now();
+  const step = () => {
+    const t = now(), dt = Math.min(40, t - last); last = t;
+    if (vert) bar.scrollTop -= v * dt; else bar.scrollLeft -= v * dt;
+    v *= Math.pow(0.94, dt / 16);
+    if (Math.abs(v) > 0.03) barFling = requestAnimationFrame(step);
+  };
+  barFling = requestAnimationFrame(step);
+}
+const isPicked = b => (mode === 'tpl' ? !!TS && TS.sel === b.dataset.key : (!F.erase && F.sel === b._piece));
 function wireDrag(b) {
   let st = null;
   const vertBar = () => getComputedStyle(bar).flexDirection === 'column';
   b.addEventListener('pointerdown', e => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
-    st = { id: e.pointerId, x0: e.clientX, y0: e.clientY, drag: false };
+    cancelAnimationFrame(barFling);
+    const vert = vertBar();
+    st = { id: e.pointerId, x0: e.clientX, y0: e.clientY, kind: null, vert, s0: vert ? bar.scrollTop : bar.scrollLeft, samples: [],
+      wasPicked: isPicked(b), prev: mode === 'tpl' ? (TS && TS.sel) : { sel: F.sel, erase: F.erase } };
     try { b.setPointerCapture(e.pointerId); } catch (_) {}
   });
   b.addEventListener('pointermove', e => {
     if (!st || e.pointerId !== st.id) return;
-    const dx = e.clientX - st.x0, dy = e.clientY - st.y0;
-    if (!st.drag) {
-      const cross = vertBar() ? Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) : Math.abs(dy) > 14 && Math.abs(dy) > Math.abs(dx);
-      if (!cross) return;
-      st.drag = true;
-      if (b._tap && !(mode === 'tpl' ? TS.sel === b.dataset.key : (!F.erase && F.sel === b._piece))) b._tap();
+    const dx = e.clientX - st.x0, dy = e.clientY - st.y0, along = st.vert ? dy : dx, cross = st.vert ? dx : dy;
+    // sliding along the bar scrolls it; pulling out toward the stage drags the piece
+    // (a slide that wanders out onto the stage turns into a drag too)
+    const toDrag = !st.kind ? Math.hypot(dx, dy) >= 10 && Math.abs(cross) >= Math.abs(along) * 0.6
+      : st.kind === 'scroll' && (Math.abs(cross) > 44 || overStage(e.clientX, e.clientY));
+    if (!st.kind && Math.hypot(dx, dy) < 10) return;
+    if (toDrag) {
+      if (b._tap && !isPicked(b)) b._tap();
+      if (!isPicked(b)) { st.kind = 'none'; return; }
+      st.kind = 'drag';
       dragImg.src = b.querySelector('img').src; dragImg.hidden = false;
+    } else if (!st.kind) st.kind = 'scroll';
+    if (st.kind === 'scroll') {
+      if (st.vert) bar.scrollTop = st.s0 - along; else bar.scrollLeft = st.s0 - along;
+      st.samples.push([now(), along]); if (st.samples.length > 5) st.samples.shift();
+      return;
     }
+    if (st.kind !== 'drag') return;
     dragImg.style.left = e.clientX + 'px'; dragImg.style.top = e.clientY + 'px';
     if (mode === 'free' && overStage(e.clientX, e.clientY)) { const [sx, sy] = stageXY(e.clientX, e.clientY); setPreview(freeCandidate(sx, sy - 40)); }
     else if (mode === 'free') setPreview(null);
   });
+  const putBack = was => {
+    // a drag that didn't land leaves the bar the way it was before the drag
+    if (was.wasPicked) return;
+    if (mode === 'tpl' && TS) { TS.sel = was.prev && readyIndexes(was.prev).length ? was.prev : null; rebuild(); }
+    else if (mode === 'free') { F.sel = was.prev.sel; F.erase = was.prev.erase; updateTools(); }
+    updateSel();
+  };
   const end = e => {
     if (!st || e.pointerId !== st.id) return;
     const was = st; st = null;
     dragImg.hidden = true;
-    if (!was.drag) { if (e.type === 'pointerup' && b._tap) b._tap(); return; }
-    if (e.type !== 'pointerup' || !overStage(e.clientX, e.clientY)) { setPreview(null); return; }
-    const [sx, sy] = stageXY(e.clientX, e.clientY);
-    if (mode === 'free') { const p = freeCandidate(sx, sy - 40); setPreview(null); if (p) freeAdd(p); else Sound.bonk(); }
-    else if (TS && TS.sel) {
-      let i = ghostAt(sx, sy, TS.sel); if (i < 0) i = nearestGhost(sx, sy, TS.sel, 110);
-      if (i >= 0) tplPlace(i); else { Sound.bonk(); toast('Drop it on a glowing spot!'); }
+    if (!was.kind) { if (e.type === 'pointerup' && b._tap) b._tap(); return; }
+    if (was.kind === 'scroll') {
+      const sm = was.samples;
+      if (e.type === 'pointerup' && sm.length > 1 && now() - sm[sm.length - 1][0] < 80) flingBar((sm[sm.length - 1][1] - sm[0][1]) / Math.max(1, sm[sm.length - 1][0] - sm[0][0]), was.vert);
+      return;
     }
+    if (was.kind !== 'drag') return;
+    setPreview(null);
+    let landed = false;
+    if (e.type === 'pointerup' && overStage(e.clientX, e.clientY)) {
+      const [sx, sy] = stageXY(e.clientX, e.clientY);
+      if (mode === 'free') { const p = freeCandidate(sx, sy - 40); if (p) { freeAdd(p); landed = true; } else Sound.bonk(); }
+      else if (TS && TS.sel) {
+        let i = ghostAt(sx, sy, TS.sel); if (i < 0) i = nearestGhost(sx, sy, TS.sel, 110);
+        if (i >= 0) { tplPlace(i); landed = true; } else { Sound.bonk(); toast('Drop it on a glowing spot!'); }
+      }
+    }
+    if (!landed) putBack(was);
   };
   b.addEventListener('pointerup', end);
   b.addEventListener('pointercancel', end);
+  b.addEventListener('lostpointercapture', end);
 }
 
 /* =====================================================================

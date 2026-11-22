@@ -149,7 +149,7 @@ body.hw .dec img{background:#efe6fb}
 #bar{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;touch-action:pan-x;padding:10px 4px 8px;min-height:92px}
 #bar::-webkit-scrollbar{display:none}
 .item{
-  position:relative;flex:0 0 auto;width:72px;height:72px;display:grid;place-items:center;padding:0;cursor:pointer;touch-action:pan-x;
+  position:relative;flex:0 0 auto;width:72px;height:72px;display:grid;place-items:center;padding:0;cursor:pointer;touch-action:none;
   border:3px solid var(--ink);border-radius:16px;background:var(--key);box-shadow:0 4px 0 var(--ink);transition:transform .1s,box-shadow .1s,background-color .15s,opacity .2s;
 }
 .item img{width:62px;height:62px;pointer-events:none;-webkit-user-drag:none;object-fit:contain}
@@ -210,7 +210,6 @@ body.hw .mark::after{background:#ff8a1e}
   #build{grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:"head head" "side stage" "side tools"}
   #side{height:100%;min-height:0}
   #bar{flex-direction:column;overflow-x:hidden;overflow-y:auto;touch-action:pan-y;padding:8px 10px 8px 4px;min-height:0;height:100%;width:96px}
-  .item{touch-action:pan-y}
   .rooms{grid-template-columns:1fr 1fr}
 }
 @media (prefers-reduced-motion: reduce){
@@ -1851,16 +1850,18 @@ function renderTray() {
     wireDrag(b, {
       canDrag: () => !!st().built[type] && emptySpots(DS.sid, type).length > 0,
       tap: () => trayTap(type),
+      snapshot: () => DS.sel,
       start: () => { if (DS.sel !== type) { DS.sel = type; updateSel(); } },
       move: (x, y, over) => { DS.hover = over ? nearestSpot(x, y - 30, emptySpots(DS.sid, type), 110) : null; },
       drop: (x, y) => {
         DS.hover = null;
         const s = nearestSpot(x, y - 30, emptySpots(DS.sid, type), 110);
-        if (s) { placeInSpot(s); return; }
+        if (s) { placeInSpot(s); return true; }
         const w = nearestSpot(x, y - 30, emptySpots(DS.sid).filter(t => typeOf(t) !== type), 80);
         if (w) wrongSpot(w); else { Sound.bonk(); toast('Drop it on a glowing spot!'); }
+        return false;
       },
-      cancel: () => { DS.hover = null; }
+      restore: prev => { if (!DS) return; DS.hover = null; DS.sel = prev && emptySpots(DS.sid, prev).length ? prev : null; updateSel(); }
     });
     bar.appendChild(b);
   }
@@ -1987,11 +1988,14 @@ function renderBar() {
     wireDrag(b, {
       canDrag: () => readyIndexes(g.k).length > 0,
       tap: () => selectKey(g.k),
+      snapshot: () => TS.sel,
       start: () => { if (TS.sel !== g.k) { TS.sel = g.k; rebuildMake(); updateSel(); } },
       drop: (x, y) => {
         let i = ghostAt(x, y, TS.sel); if (i < 0) i = nearestGhost(x, y, TS.sel, 110);
-        if (i >= 0) placeMake(i); else { Sound.bonk(); toast('Drop it on a glowing spot!'); }
-      }
+        if (i >= 0) { placeMake(i); return true; }
+        Sound.bonk(); toast('Drop it on a glowing spot!'); return false;
+      },
+      restore: prev => { if (!TS) return; TS.sel = prev && readyIndexes(prev).length ? prev : null; rebuildMake(); updateSel(); }
     });
     bar.appendChild(b);
   }
@@ -2007,36 +2011,71 @@ function updateProgress() {
 const dragImg = $('#dragImg');
 function overStage(x, y) { const r = stage.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; }
 function stageXY(x, y) { const r = stage.getBoundingClientRect(); return [x - r.left, y - r.top]; }
+/* Drag from the bar. Items slide the bar themselves (touch-action: none), so the browser
+   never takes over a drag that starts a little sideways and drops the piece. A drag that
+   doesn't land puts the selection back the way it was. */
+let barFling = 0;
+function flingBar(v, vert) {
+  cancelAnimationFrame(barFling);
+  if (reduceMotion || Math.abs(v) < 0.15) return;
+  let last = now();
+  const step = () => {
+    const t = now(), dt = Math.min(40, t - last); last = t;
+    if (vert) bar.scrollTop -= v * dt; else bar.scrollLeft -= v * dt;
+    v *= Math.pow(0.94, dt / 16);
+    if (Math.abs(v) > 0.03) barFling = requestAnimationFrame(step);
+  };
+  barFling = requestAnimationFrame(step);
+}
 function wireDrag(btn, h) {
   let st0 = null;
   const vertBar = () => getComputedStyle(bar).flexDirection === 'column';
   btn.addEventListener('pointerdown', e => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
-    st0 = { id: e.pointerId, x0: e.clientX, y0: e.clientY, drag: false };
+    cancelAnimationFrame(barFling);
+    const vert = vertBar();
+    st0 = { id: e.pointerId, x0: e.clientX, y0: e.clientY, kind: null, vert, s0: vert ? bar.scrollTop : bar.scrollLeft, samples: [], prev: h.snapshot ? h.snapshot() : null };
     try { btn.setPointerCapture(e.pointerId); } catch (_) {}
   });
   btn.addEventListener('pointermove', e => {
     if (!st0 || e.pointerId !== st0.id) return;
-    const dx = e.clientX - st0.x0, dy = e.clientY - st0.y0;
-    if (!st0.drag) {
-      const cross = vertBar() ? Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) : Math.abs(dy) > 14 && Math.abs(dy) > Math.abs(dx);
-      if (!cross) return;
-      if (h.canDrag && !h.canDrag()) { st0 = null; return; }
-      st0.drag = true; h.start && h.start();
+    const dx = e.clientX - st0.x0, dy = e.clientY - st0.y0, along = st0.vert ? dy : dx, cross = st0.vert ? dx : dy;
+    // sliding along the bar scrolls it; pulling out toward the stage drags the piece
+    // (a slide that wanders out onto the stage turns into a drag too)
+    const toDrag = !st0.kind ? Math.hypot(dx, dy) >= 10 && Math.abs(cross) >= Math.abs(along) * 0.6
+      : st0.kind === 'scroll' && (Math.abs(cross) > 44 || overStage(e.clientX, e.clientY));
+    if (!st0.kind && Math.hypot(dx, dy) < 10) return;
+    if (toDrag) {
+      if (h.canDrag && !h.canDrag()) { st0.kind = 'none'; return; }
+      st0.kind = 'drag'; h.start && h.start();
       dragImg.src = btn.querySelector('img').src; dragImg.hidden = false;
+    } else if (!st0.kind) st0.kind = 'scroll';
+    if (st0.kind === 'scroll') {
+      if (st0.vert) bar.scrollTop = st0.s0 - along; else bar.scrollLeft = st0.s0 - along;
+      st0.samples.push([now(), along]); if (st0.samples.length > 5) st0.samples.shift();
+      return;
     }
+    if (st0.kind !== 'drag') return;
     dragImg.style.left = e.clientX + 'px'; dragImg.style.top = e.clientY + 'px';
     if (h.move) { const [sx, sy] = stageXY(e.clientX, e.clientY); h.move(sx, sy, overStage(e.clientX, e.clientY)); }
   });
   const end = e => {
     if (!st0 || e.pointerId !== st0.id) return;
     const was = st0; st0 = null; dragImg.hidden = true;
-    if (!was.drag) { if (e.type === 'pointerup' && h.tap) h.tap(); return; }
-    if (e.type === 'pointerup' && overStage(e.clientX, e.clientY)) { const [sx, sy] = stageXY(e.clientX, e.clientY); h.drop(sx, sy); }
-    else if (h.cancel) h.cancel();
+    if (!was.kind) { if (e.type === 'pointerup' && h.tap) h.tap(); return; }
+    if (was.kind === 'scroll') {
+      const sm = was.samples;
+      if (e.type === 'pointerup' && sm.length > 1 && now() - sm[sm.length - 1][0] < 80) flingBar((sm[sm.length - 1][1] - sm[0][1]) / Math.max(1, sm[sm.length - 1][0] - sm[0][0]), was.vert);
+      return;
+    }
+    if (was.kind !== 'drag') return;
+    let landed = false;
+    if (e.type === 'pointerup' && overStage(e.clientX, e.clientY)) { const [sx, sy] = stageXY(e.clientX, e.clientY); landed = !!h.drop(sx, sy); }
+    if (!landed && h.restore) h.restore(was.prev);
   };
   btn.addEventListener('pointerup', end);
   btn.addEventListener('pointercancel', end);
+  btn.addEventListener('lostpointercapture', end);
 }
 
 /* =====================================================================
