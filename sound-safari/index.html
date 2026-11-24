@@ -14,7 +14,7 @@
 <title>Sound Safari</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Bagel+Fat+One&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
   /* Layout: sixth sibling of the kids' games. Savanna-orange toy frame. Kid side = big animal
@@ -28,9 +28,11 @@
   --go:#2fcf6b;
   --pop:#ff4f8b;
   --sky:#e8f6ff;
-  --display:"Bagel Fat One","Baloo 2",ui-rounded,"Arial Rounded MT Bold",system-ui,sans-serif;
-  --body:"Baloo 2",ui-rounded,"Arial Rounded MT Bold",system-ui,sans-serif;
-  --word:"Andika","Baloo 2",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  /* one plain, Calibri-style font everywhere (Carlito is the free Calibri look-alike) */
+  --plain:Calibri,Carlito,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --display:var(--plain);
+  --body:var(--plain);
+  --word:var(--plain);
   --emoji:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
   --dots:radial-gradient(circle at 2px 2px,rgba(255,255,255,.32) 1.6px,transparent 1.9px) 0 0/16px 16px;
   color-scheme:light;
@@ -58,7 +60,7 @@ button{font:inherit;color:inherit}
 .pill{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border:3px solid var(--ink);border-radius:999px;background:var(--key);box-shadow:0 4px 0 var(--ink);
   font:800 18px/1 var(--body);cursor:pointer;touch-action:manipulation}
 .pill:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
-.pill.primary{background:var(--go);color:#fff;-webkit-text-stroke:.4px var(--ink)}
+.pill.primary{background:var(--go);color:#fff}
 .pill.small{padding:8px 14px;font-size:15px}
 .pill.red{background:#ff5d5d;color:#fff}
 .pill:disabled{opacity:.45}
@@ -71,21 +73,15 @@ button{font:inherit;color:inherit}
 @keyframes bob{0%,100%{translate:0 0}50%{translate:0 -6px}}
 
 /* ---------- title ---------- */
-.title{margin:0;text-align:center;font:400 46px/0.95 var(--display);letter-spacing:.5px;color:#fff;
-  -webkit-text-stroke:3px var(--ink);paint-order:stroke fill;text-shadow:0 4px 0 var(--ink)}
+.title{margin:0;text-align:center;font:700 44px/1 var(--display);color:#fff;text-shadow:0 3px 0 var(--ink)}
 .title span{display:inline-block}
-.title span:nth-child(5n+1){color:#fff}
-.title span:nth-child(5n+2){color:#ffe08a}
-.title span:nth-child(5n+3){color:#b8f0c8}
-.title span:nth-child(5n+4){color:#ffd0e1}
-.title span:nth-child(5n+5){color:#c9e8ff}
 
 /* ---------- home ---------- */
 #home{display:flex;flex-direction:column;gap:14px;overflow-y:auto;touch-action:pan-y}
 .big-play{display:flex;align-items:center;justify-content:center;gap:14px;width:min(100%,440px);margin:0 auto;padding:14px 18px;cursor:pointer;touch-action:manipulation;
-  background:var(--go);border:4px solid var(--ink);border-radius:28px;box-shadow:0 7px 0 var(--ink);color:#fff;font:400 34px/1 var(--display);-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;flex:0 0 auto}
+  background:var(--go);border:4px solid var(--ink);border-radius:28px;box-shadow:0 7px 0 var(--ink);color:#fff;font:700 38px/1 var(--display);text-shadow:0 2px 0 rgba(35,26,79,.55);flex:0 0 auto}
 .big-play:active{transform:translateY(5px);box-shadow:0 2px 0 var(--ink)}
-.big-play .e{font-size:54px;-webkit-text-stroke:0}
+.big-play .e{font-size:54px;text-shadow:none}
 .big-play svg{width:46px;height:46px;flex:0 0 auto}
 .worlds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;width:min(100%,440px);margin:0 auto;flex:0 0 auto}
 .world{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px 10px;cursor:pointer;touch-action:manipulation;
@@ -93,7 +89,7 @@ button{font:inherit;color:inherit}
 .world:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
 .world .ring{display:grid;place-items:center;width:84px;height:84px;border-radius:50%;background:var(--c);border:3px solid var(--ink)}
 .world .ring .e{font-size:50px}
-.world b{font:400 26px/1 var(--display);letter-spacing:1px;margin-top:4px}
+.world b{font:700 30px/1 var(--display);margin-top:4px}
 .world .stars{display:flex;align-items:center;gap:3px;font:800 15px/1 var(--body)}
 .world .stars svg{width:18px;height:18px}
 .home-foot{display:flex;justify-content:space-between;align-items:center;width:min(100%,440px);margin:auto auto 0;flex:0 0 auto;padding-top:4px}
@@ -135,13 +131,13 @@ button{font:inherit;color:inherit}
   background:var(--sky);border:4px solid var(--ink);border-radius:30px;box-shadow:0 6px 0 var(--ink);padding:12px;overflow:hidden}
 .buddy{position:absolute;left:10px;top:8px;display:grid;place-items:center;width:62px;height:62px;border-radius:50%;background:var(--c);border:3px solid var(--ink)}
 .buddy .e{font-size:38px}
-.bubble{position:absolute;left:78px;top:14px;padding:6px 12px;background:#fff;border:3px solid var(--ink);border-radius:18px;font:800 20px/1 var(--body)}
+.bubble{position:absolute;left:78px;top:14px;padding:6px 12px;background:#fff;border:3px solid var(--ink);border-radius:18px;font:700 22px/1 var(--body)}
 .bubble .e{font-size:24px;vertical-align:-3px}
 .card{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 22px 10px;cursor:pointer;touch-action:manipulation;
   background:#fff;border:4px solid var(--ink);border-radius:28px;box-shadow:0 6px 0 var(--ink)}
 .card:active{transform:translateY(3px);box-shadow:0 3px 0 var(--ink)}
 .card .pic{font-family:var(--emoji);font-size:min(30vw,150px);line-height:1.08}
-.card .word{font:700 30px/1.1 var(--word);letter-spacing:.5px}
+.card .word{font:700 36px/1.1 var(--word);letter-spacing:.5px}
 .card .word u{text-decoration:none;color:#e8336f;border-bottom:4px solid #e8336f}
 .card.syl .pic{font-size:min(24vw,110px)}
 .say-row{display:flex;align-items:center;justify-content:center;gap:14px;flex:0 0 auto}
@@ -172,7 +168,7 @@ button{font:inherit;color:inherit}
 #mSide{width:min(40vw,180px,24vh);height:auto;background:#fff;border:3px solid var(--ink);border-radius:20px}
 .mirror{width:min(40vw,180px,24vh);aspect-ratio:1;border-radius:20px;border:3px solid var(--ink);overflow:hidden;background:#222;position:relative}
 .mirror video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
-.cue{font:800 17px/1.2 var(--body);text-align:center;max-width:320px}
+.cue{font:700 19px/1.25 var(--body);text-align:center;max-width:330px}
 /* helper pop */
 .pop{position:absolute;inset:0;z-index:20;display:grid;place-items:center;background:rgba(35,26,79,.45)}
 .pop-card{display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px;background:#fff;border:4px solid var(--ink);border-radius:28px;box-shadow:0 7px 0 var(--ink);max-width:92%}
@@ -180,7 +176,7 @@ button{font:inherit;color:inherit}
 
 /* ---------- reward ---------- */
 #reward{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center}
-#reward h2{margin:0;font:400 40px/1 var(--display);color:#fff;-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;text-shadow:0 4px 0 var(--ink)}
+#reward h2{margin:0;font:700 42px/1 var(--display);color:#fff;text-shadow:0 3px 0 var(--ink)}
 .gifts{display:flex;gap:14px}
 .gift{display:grid;place-items:center;width:min(27vw,112px);aspect-ratio:1;border-radius:24px;border:4px solid var(--ink);background:#fff;box-shadow:0 6px 0 var(--ink);cursor:pointer;touch-action:manipulation}
 .gift .e{font-size:min(16vw,64px)}
@@ -200,9 +196,9 @@ button{font:inherit;color:inherit}
 /* ---------- grown-ups ---------- */
 #grown{background:#fffaf0;overflow-y:auto;touch-action:pan-y;-webkit-user-select:text;user-select:text}
 #grown .wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px;padding-bottom:30px}
-#grown h1{margin:0;font:400 30px/1 var(--display)}
+#grown h1{margin:0;font:700 30px/1 var(--display)}
 #grown h2{margin:0 0 6px;font:800 21px/1.2 var(--body)}
-#grown p{margin:0 0 8px;font:600 16px/1.45 var(--body)}
+#grown p{margin:0 0 8px;font:400 17px/1.45 var(--body)}
 .sec{background:#fff;border:3px solid var(--ink);border-radius:20px;padding:14px;box-shadow:0 4px 0 var(--ink)}
 .row{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:2px solid #f0e7d2}
 .row:first-of-type{border-top:0}
